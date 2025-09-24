@@ -293,19 +293,28 @@ export function useEmergency(): UseEmergencyReturn {
     }
   }, []);
 
-  // Helper function to initiate VAPI call
+    // Helper function to initiate VAPI call
   const initiateEmergencyCall = async (emergencyData: any) => {
     try {
       setState(prev => ({ ...prev, status: 'calling' }));
 
-      const userData = {
-        name: 'John Doe', // This would come from user context
-        phone: '+1234567890',
-        medicalInfo: 'Diabetes, High Blood Pressure',
-        emergencyContacts: ['Jane Doe - (555) 987-6543']
+      // Fetch user data from our API
+      const userRes = await fetch('/api/profile');
+      const userData = await userRes.json();
+
+      // Fetch contacts from our API
+      const contactsRes = await fetch('/api/emergency-contacts');
+      const contacts = await contactsRes.json();
+      const contactStrings = contacts.map((c: any) => `${c.name} - ${c.phone}`);
+
+      const callData = {
+        name: userData.name,
+        phone: userData.phone,
+        medicalInfo: userData.medicalInfo,
+        emergencyContacts: contactStrings,
       };
 
-      const callResponse = await vapiApi.initiateEmergencyCall(userData, emergencyData);
+      const callResponse = await vapiApi.initiateEmergencyCall(callData, emergencyData);
       
       if (callResponse.success) {
         setState(prev => ({ ...prev, status: 'connected' }));
@@ -318,14 +327,14 @@ export function useEmergency(): UseEmergencyReturn {
   // Helper function to notify emergency contacts
   const notifyEmergencyContacts = async (emergencyData: any) => {
     try {
-      const contacts = [
-        {
-          id: '1',
-          name: 'Jane Doe',
-          phone: '+1234567890',
-          relationship: 'Spouse'
-        }
-      ];
+      // Fetch contacts from our API
+      const contactsRes = await fetch('/api/emergency-contacts');
+      const contacts = await contactsRes.json();
+
+      if (!contacts || contacts.length === 0) {
+        console.log('No emergency contacts to notify.');
+        return;
+      }
 
       const message = `EMERGENCY ALERT: ${emergencyData.type} reported at ${emergencyData.timestamp}. ${emergencyData.location ? `Location: ${emergencyData.location.coords.latitude}, ${emergencyData.location.coords.longitude}` : 'Location not available'}. Emergency services have been contacted.`;
 
@@ -376,29 +385,9 @@ export function useEmergencyContacts() {
     setError(null);
 
     try {
-      // Mock data - this would come from your backend
-      const emergencyContacts = [
-        {
-          id: '1',
-          name: 'Jane Doe',
-          relationship: 'Spouse',
-          phone: '(555) 987-6543',
-          email: 'jane.doe@example.com',
-          isPrimary: true,
-          isActive: true
-        },
-        {
-          id: '2',
-          name: 'Dr. Sarah Smith',
-          relationship: 'Doctor',
-          phone: '(555) 123-9876',
-          email: 'dr.smith@hospital.com',
-          isPrimary: false,
-          isActive: true
-        }
-      ];
-
-      setContacts(emergencyContacts);
+      const response = await fetch('/api/emergency-contacts');
+      const data = await response.json();
+      setContacts(data);
     } catch (err) {
       setError('Failed to load emergency contacts');
       console.error('Error loading contacts:', err);

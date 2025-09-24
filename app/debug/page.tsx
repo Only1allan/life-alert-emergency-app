@@ -121,7 +121,7 @@ export default function DebugPage() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mt-6">
             <h3 className="text-lg font-semibold text-yellow-800 mb-2">No Stories Found</h3>
             <p className="text-yellow-700">
-              It looks like there are no stories in your Storyblok space yet. Make sure you've:
+              It looks like there are no stories in your Storyblok space yet. Make sure you&apos;ve:
             </p>
             <ul className="list-disc list-inside text-yellow-700 mt-2">
               <li>Created content in your Storyblok space</li>

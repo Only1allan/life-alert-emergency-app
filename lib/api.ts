@@ -283,30 +283,40 @@ export const notificationApi = {
   // Send SMS to emergency contacts
   sendEmergencySMS: async (contacts: any[], message: string) => {
     try {
-      // This would integrate with Twilio, AWS SNS, or similar service
       const results = await Promise.all(
         contacts.map(async (contact) => {
-          // Mock SMS sending
-          console.log(`Sending SMS to ${contact.phone}: ${message}`);
-          
+          const response = await fetch('/api/send-sms', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              to: contact.phone,
+              body: message,
+            }),
+          });
+
+          const result = await response.json();
+
           return {
             contactId: contact.id,
             phone: contact.phone,
-            status: 'sent',
-            messageId: `MSG-${Date.now()}-${Math.random().toString(36).substring(7)}`
+            status: result.success ? 'sent' : 'failed',
+            messageId: result.success ? result.messageId : null,
+            error: result.success ? null : result.error,
           };
         })
       );
 
       return {
         success: true,
-        results
+        results,
       };
     } catch (error) {
       console.error('Error sending emergency SMS:', error);
       return {
         success: false,
-        error: 'Failed to send SMS notifications'
+        error: 'Failed to send SMS notifications',
       };
     }
   },

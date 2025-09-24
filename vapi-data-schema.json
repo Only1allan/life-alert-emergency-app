@@ -1,0 +1,156 @@
+{
+    "userProfile": {
+        "description": "Complete user profile data from Storyblok",
+        "properties": {
+            "full_name": { "type": "string", "description": "User's full name" },
+            "age": { "type": "number", "description": "User's age" },
+            "phone_number": { "type": "string", "description": "Primary phone number" },
+            "email": { "type": "string", "description": "Email address" },
+            "address": { "type": "string", "description": "Full home address" },
+            "medical_conditions": { "type": "string", "description": "Comma-separated medical conditions" },
+            "allergies": { "type": "string", "description": "Known allergies" },
+            "medications": { "type": "string", "description": "Current medications" },
+            "insurance_provider": { "type": "string", "description": "Health insurance provider" },
+            "preferred_hospital": {
+                "type": "object",
+                "properties": {
+                    "hospital_name": { "type": "string" },
+                    "phone_number": { "type": "string" },
+                    "emergency_phone": { "type": "string" },
+                    "address": { "type": "string" }
+                }
+            }
+        }
+    },
+    "emergencyContacts": {
+        "description": "Array of emergency contacts",
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "contact_name": { "type": "string", "description": "Contact's full name" },
+                "relationship": { "type": "string", "description": "Relationship to user (spouse, daughter, etc.)" },
+                "phone_number": { "type": "string", "description": "Contact's phone number" },
+                "email": { "type": "string", "description": "Contact's email" },
+                "is_primary": { "type": "boolean", "description": "Whether this is the primary emergency contact" },
+                "priority_level": { "type": "number", "description": "Contact priority (1 = highest)" },
+                "availability_hours": { "type": "string", "description": "When this contact is typically available" }
+            }
+        }
+    },
+    "hospitals": {
+        "description": "Array of nearby hospitals",
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "hospital_name": { "type": "string", "description": "Hospital name" },
+                "phone_number": { "type": "string", "description": "Main hospital phone" },
+                "emergency_phone": { "type": "string", "description": "Emergency department direct line" },
+                "address": { "type": "string", "description": "Hospital address" },
+                "availability_status": {
+                    "type": "string",
+                    "enum": ["Available", "Busy", "Full", "Closed"],
+                    "description": "Current availability status"
+                },
+                "specialties": { "type": "array", "items": { "type": "string" } },
+                "distance_miles": { "type": "number", "description": "Distance from user in miles" },
+                "estimated_travel_time": { "type": "string", "description": "Estimated travel time" }
+            }
+        }
+    },
+    "emergencyLogs": {
+        "description": "Previous emergency history",
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "timestamp": { "type": "string", "description": "Emergency timestamp" },
+                "severity_level": {
+                    "type": "string",
+                    "enum": ["Low", "Medium", "High", "Critical"],
+                    "description": "Assessed severity level"
+                },
+                "emergency_type": { "type": "string", "description": "Type of emergency" },
+                "agent_decision": { "type": "string", "description": "AI decision made" },
+                "outcome_status": {
+                    "type": "string",
+                    "enum": ["Resolved", "Hospital Visit", "911 Called", "False Alarm"],
+                    "description": "Final outcome"
+                },
+                "response_time_seconds": { "type": "number", "description": "Response time in seconds" },
+                "agent_summary": { "type": "string", "description": "AI summary of the emergency" },
+                "contacts_reached": { "type": "array", "items": { "type": "string" } },
+                "hospital_contacted": { "type": "string", "description": "Hospital that was contacted" }
+            }
+        }
+    },
+    "currentLocation": {
+        "description": "User's current location",
+        "properties": {
+            "latitude": { "type": "number", "description": "GPS latitude" },
+            "longitude": { "type": "number", "description": "GPS longitude" },
+            "address": { "type": "string", "description": "Current address if different from home" },
+            "accuracy": { "type": "number", "description": "Location accuracy in meters" },
+            "timestamp": { "type": "string", "description": "When location was captured" }
+        }
+    },
+    "emergencyAssessment": {
+        "description": "Real-time emergency assessment data",
+        "properties": {
+            "severity_rating": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "User-reported severity (1-10 scale)"
+            },
+            "emergency_type": {
+                "type": "string",
+                "enum": ["Medical", "Fall", "Chest Pain", "Breathing", "Injury", "Other"],
+                "description": "Type of emergency reported"
+            },
+            "consciousness_level": {
+                "type": "string",
+                "enum": ["Alert", "Confused", "Unresponsive"],
+                "description": "User's consciousness level"
+            },
+            "mobility_status": {
+                "type": "string",
+                "enum": ["Mobile", "Limited", "Unable to move"],
+                "description": "User's ability to move"
+            },
+            "speech_clarity": {
+                "type": "string",
+                "enum": ["Clear", "Slurred", "Difficulty speaking"],
+                "description": "Quality of user's speech"
+            },
+            "breathing_status": {
+                "type": "string",
+                "enum": ["Normal", "Labored", "Difficulty breathing"],
+                "description": "User's breathing condition"
+            }
+        }
+    },
+    "decisionMatrix": {
+        "description": "AI decision-making logic based on assessment",
+        "properties": {
+            "recommended_action": {
+                "type": "string",
+                "enum": ["Call 911", "Contact Hospital", "Call Emergency Contact", "Provide Guidance"],
+                "description": "Primary recommended action"
+            },
+            "urgency_level": {
+                "type": "string",
+                "enum": ["Immediate", "Urgent", "Standard", "Low"],
+                "description": "Urgency classification"
+            },
+            "reasoning": { "type": "string", "description": "AI reasoning for the decision" },
+            "backup_actions": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Alternative actions if primary fails"
+            },
+            "estimated_response_time": { "type": "string", "description": "Expected response time" }
+        }
+    }
+}
