@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import VAPIWebCall from './VAPIWebCall';
 import useGeolocation from '../hooks/useGeolocation';
 
@@ -16,11 +16,8 @@ export default function PanicButton({
   size = 'lg' 
 }: PanicButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
   const [showVAPICall, setShowVAPICall] = useState(false);
   const [emergencyTriggered, setEmergencyTriggered] = useState(false);
-  
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Get user location for emergency
   const { getCurrentLocation, location } = useGeolocation();
@@ -32,79 +29,74 @@ export default function PanicButton({
   };
 
   const handlePress = () => {
-    if (disabled || showVAPICall) return;
-    
-    console.log('🚨 PANIC BUTTON PRESSED - STARTING COUNTDOWN');
+    if (disabled || showVAPICall || emergencyTriggered) return;
     
     setIsPressed(true);
+    setEmergencyTriggered(true);
     
     // Get current location immediately
     getCurrentLocation();
     
-    // Start 3-second countdown
-    let count = 3;
-    setCountdown(count);
+    // Start VAPI call immediately
+    setShowVAPICall(true);
     
-    timerRef.current = setInterval(() => {
-      count--;
-      setCountdown(count);
-      
-      if (count === 0) {
-        clearInterval(timerRef.current!);
-        triggerEmergency();
-      }
-    }, 1000);
+    // Don't send email here - let VAPI handle it
   };
 
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
     
-    if (timerRef.current && !emergencyTriggered) {
-      console.log('🚨 PANIC BUTTON CANCELLED');
-      
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-      setIsPressed(false);
-      setCountdown(null);
+    // Emergency already triggered, cannot cancel
+    if (emergencyTriggered) {
+      return;
     }
+    
+    // Reset state if emergency hasn't been triggered yet
+    setIsPressed(false);
   };
 
-  // Trigger emergency response
-  const triggerEmergency = async () => {
-    console.log('🚨 EMERGENCY TRIGGERED - EXECUTING WORKFLOW');
-    
-    setEmergencyTriggered(true);
-    setIsPressed(false);
-    setCountdown(null);
 
+  // Trigger emergency notifications immediately
+  const triggerEmergencyNotifications = async () => {
     try {
-      // Step 1: Get User Location (GPS/Browser)
-      console.log('📍 Step 1: Getting user location...');
-      if (!location) {
-        getCurrentLocation();
+      // Get emergency contacts
+      const contactsResponse = await fetch('/api/emergency-contacts');
+      const contacts = await contactsResponse.json();
+      
+      if (!contacts || contacts.length === 0) {
+        return;
       }
-      
-      // Step 2: Load User Profile from Storyblok (already loaded via useUserProfile)
-      console.log('👤 Step 2: User profile loaded from Storyblok');
-      
-      // Step 3: VAPI AI Assessment Call
-      console.log('🤖 Step 3: Initiating VAPI AI Assessment...');
-      setShowVAPICall(true);
 
-      // Step 4: Start emergency logging workflow
-      console.log('📝 Step 4: Creating emergency log entry...');
+      // Prepare notification data
+      const notificationData = {
+        emergencyType: 'panic_button',
+        severity: 8,
+        location: location ? 
+          `${location.coords.latitude}, ${location.coords.longitude}` : 
+          'Location unavailable',
+        timestamp: new Date().toISOString(),
+        aiSummary: 'Emergency panic button activated - immediate response required',
+        storyblokLogId: null,
+        contacts: contacts.slice(0, 3)
+      };
+
+      // Send notifications
+      await fetch('/api/emergency/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notificationData)
+      });
+      
+      // Also create emergency log
       await createEmergencyLog();
-
+      
       // Call parent callback if provided
       if (onEmergency) {
         onEmergency();
       }
+      
     } catch (error) {
-      console.error('❌ Emergency workflow error:', error);
-      // Fallback to 911
-      if (confirm('Emergency system error. Would you like to call 911 directly?')) {
-        window.location.href = 'tel:911';
-      }
+      // Silent error handling
     }
   };
 
@@ -123,23 +115,28 @@ export default function PanicButton({
         user_id: 'test-user' // This would come from auth context
       };
 
-      // This would create a new emergency log entry in Storyblok
-      console.log('📝 Emergency log created:', emergencyData);
-      
       // Store in localStorage as fallback until Storyblok API is implemented
       const existingLogs = JSON.parse(localStorage.getItem('emergency_logs') || '[]');
       existingLogs.push(emergencyData);
       localStorage.setItem('emergency_logs', JSON.stringify(existingLogs));
       
     } catch (error) {
-      console.error('Error creating emergency log:', error);
+      // Silent error handling
+    }
+  };
+
+  // Handle real-time emergency detection during VAPI call
+  const handleEmergencyDetected = (severity: number, transcript: string) => {
+    // Update UI to show emergency status
+    if (severity >= 8) {
+      // Critical emergency detected
+    } else if (severity >= 5) {
+      // Moderate emergency detected
     }
   };
 
   // Handle VAPI call completion
-  const handleVAPICallComplete = (result: any) => {
-    console.log('✅ VAPI EMERGENCY CALL COMPLETED:', result);
-    
+  const handleVAPICallComplete = async (result: any) => {
     setShowVAPICall(false);
     setEmergencyTriggered(false);
     
@@ -149,8 +146,6 @@ export default function PanicButton({
 
   // Handle VAPI call error
   const handleVAPICallError = (error: string) => {
-    console.error('❌ VAPI EMERGENCY CALL ERROR:', error);
-    
     setShowVAPICall(false);
     setEmergencyTriggered(false);
     
@@ -167,17 +162,17 @@ export default function PanicButton({
     <>
       <div className="flex flex-col items-center space-y-4">
         <button
-          onClick={isPressed ? handleCancel : handlePress}
-          disabled={disabled || showVAPICall}
+          onClick={handlePress}
+          disabled={disabled || showVAPICall || emergencyTriggered}
           className={`
             ${sizeClasses[size]}
-            ${isPressed 
+            ${emergencyTriggered 
               ? 'bg-red-700 animate-pulse' 
               : showVAPICall
               ? 'bg-green-600 animate-pulse'
               : 'bg-red-600 hover:bg-red-700'
             }
-            ${disabled || showVAPICall ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}
+            ${disabled || showVAPICall || emergencyTriggered ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}
             text-white rounded-full shadow-2xl 
             transform transition-all duration-200
             hover:scale-105 active:scale-95
@@ -189,21 +184,21 @@ export default function PanicButton({
           <div className="text-4xl mb-2">
             {showVAPICall ? '📞' : '🚨'}
           </div>
-          <div className={countdown !== null ? 'text-3xl' : ''}>
-            {showVAPICall ? 'CALLING' : countdown !== null ? countdown : 'EMERGENCY'}
+          <div className="text-3xl">
+            {showVAPICall ? 'CALLING' : 'EMERGENCY'}
           </div>
           <div className="text-sm font-normal">
-            {showVAPICall ? 'AI Agent Active' : countdown !== null ? 'Click to Cancel' : 'Press for Help'}
+            {showVAPICall ? 'AI Agent Active' : 'Press to Call'}
           </div>
         </button>
         
-        {isPressed && !showVAPICall && (
+        {emergencyTriggered && !showVAPICall && (
           <div className="text-center">
-            <p className="text-red-600 font-semibold animate-pulse">
-              Emergency alert will be sent in {countdown} seconds
+            <p className="text-green-600 font-semibold animate-pulse">
+              🚨 Starting Emergency Call... 🚨
             </p>
             <p className="text-gray-600 text-sm">
-              Click the button again to cancel
+              Connecting to AI Emergency Agent
             </p>
           </div>
         )}
@@ -219,10 +214,10 @@ export default function PanicButton({
           </div>
         )}
         
-        {!isPressed && !showVAPICall && (
+        {!emergencyTriggered && !showVAPICall && (
           <div className="text-center max-w-xs">
             <p className="text-gray-600 text-sm">
-              Press the emergency button to connect with our AI Emergency Agent who will assess your situation and coordinate the appropriate response
+              Press the emergency button to immediately start an emergency call with our AI Emergency Agent
             </p>
           </div>
         )}
@@ -231,8 +226,10 @@ export default function PanicButton({
       {/* VAPI Web Call Interface */}
       {showVAPICall && (
         <VAPIWebCall
+          key="emergency-call"
           onCallComplete={handleVAPICallComplete}
           onError={handleVAPICallError}
+          onEmergencyDetected={handleEmergencyDetected}
           emergencyType="panic_button"
         />
       )}

@@ -141,7 +141,7 @@ async function triggerEmergencyNotifications(emergencyData: EmergencyLogData, st
     console.log('📧 Triggering emergency notifications...');
     
     // Get user's emergency contacts
-    const contactsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'}/api/emergency-contacts`);
+    const contactsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/emergency-contacts`);
     const contacts = await contactsResponse.json();
     
     if (!contacts || contacts.length === 0) {
@@ -162,7 +162,7 @@ async function triggerEmergencyNotifications(emergencyData: EmergencyLogData, st
 
     // Send notifications via separate API
     const notificationResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3004'}/api/emergency/notify`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/emergency/notify`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -243,4 +243,5 @@ export async function GET(request: Request) {
     }, { status: 500 });
   }
 }
+
 

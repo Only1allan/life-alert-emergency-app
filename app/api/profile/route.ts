@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
-import { storyblokApi } from '@/lib/storyblok';
+import { getStoryblokApi } from '@storyblok/react/rsc';
 
 // This would typically be dynamic based on the logged-in user
-const USER_PROFILE_SLUG = 'test-user';
+const USER_PROFILE_SLUG = 'user-profile-john-doe';
 
 export async function GET() {
+  const storyblokApi = getStoryblokApi();
 
   try {
-    const userProfile = await storyblokApi.getUserProfile(USER_PROFILE_SLUG);
+    const { data } = await storyblokApi.get(`cdn/stories/${USER_PROFILE_SLUG}`, {
+      version: 'draft',
+    });
 
-    if (!userProfile) {
+    if (!data || !data.story) {
       // As a fallback for the demo, return some default data
       // In a real app, you'd return a 404
       return NextResponse.json({
@@ -19,15 +22,12 @@ export async function GET() {
       });
     }
 
+    const userProfile = data.story.content;
+
     return NextResponse.json({
-      name: userProfile.full_name || 'N/A',
-      phone: userProfile.phone_number || 'N/A',
-      medicalInfo: userProfile.medical_conditions || 'N/A',
-      age: userProfile.age || 'N/A',
-      address: userProfile.address || 'N/A',
-      allergies: userProfile.allergies || 'N/A',
-      medications: userProfile.medications || 'N/A',
-      insurance: userProfile.insurance_provider || 'N/A'
+      name: userProfile.name || 'N/A',
+      phone: userProfile.phone || 'N/A',
+      medicalInfo: userProfile.medical_info || 'N/A',
     });
 
   } catch (error) {

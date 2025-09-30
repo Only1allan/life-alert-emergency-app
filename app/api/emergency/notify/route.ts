@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendEmailNotification, testEmailConfiguration } from '@/lib/emailService';
 
 interface NotificationData {
   emergencyType: string;
@@ -20,11 +21,7 @@ export async function POST(request: Request) {
   try {
     const notificationData: NotificationData = await request.json();
     
-    console.log('📧 Sending emergency notifications:', {
-      type: notificationData.emergencyType,
-      severity: notificationData.severity,
-      contactCount: notificationData.contacts.length
-    });
+    // Process emergency notification
 
     const results = {
       emailsSent: 0,
@@ -42,16 +39,19 @@ export async function POST(request: Request) {
         // Send email notification (if email available)
         if (contact.email) {
           const emailResult = await sendEmailNotification(contact.email, emergencyMessage);
+          
           if (emailResult.success) {
             results.emailsSent++;
             results.notifications.push({
               type: 'email',
               recipient: contact.email,
               status: 'sent',
-              contact: contact.contact_name
+              contact: contact.contact_name,
+              messageId: emailResult.messageId,
+              mock: (emailResult as any).mock || false
             });
           } else {
-            results.errors.push(`Email failed for ${contact.contact_name}: ${emailResult.error}`);
+            results.errors.push(`Email failed for ${contact.contact_name}: ${(emailResult as any).error}`);
           }
         }
 
@@ -73,18 +73,11 @@ export async function POST(request: Request) {
       } catch (error) {
         const errorMessage = `Failed to notify ${contact.contact_name}: ${error instanceof Error ? error.message : 'Unknown error'}`;
         results.errors.push(errorMessage);
-        console.error('❌', errorMessage);
       }
     }
 
     // Create summary notification log
     await createNotificationSummary(notificationData, results);
-
-    console.log('📊 Notification results:', {
-      emailsSent: results.emailsSent,
-      pushSent: results.pushNotificationsSent,
-      errors: results.errors.length
-    });
 
     return NextResponse.json({
       success: true,
@@ -107,21 +100,40 @@ export async function POST(request: Request) {
   }
 }
 
-// Create emergency message content using Storyblok templates
+// Create emergency message using Storyblok templates
 async function createEmergencyMessage(data: NotificationData, contact: any) {
   try {
-    // Try to get message template from Storyblok
-    const template = await getMessageTemplate(data.severity);
+    console.log(`📧 Fetching template for: ${data.emergencyType}, severity: ${data.severity}`);
+    
+    // Fetch template from our simplified API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(
+      `${baseUrl}/api/storyblok/templates?type=${data.emergencyType}&severity=${data.severity}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Template API error: ${response.status}`);
+    }
+
+    const templateData = await response.json();
+    const template = templateData.template;
     
     if (template) {
-      console.log(`📧 Using Storyblok template: ${template.template_name}`);
+      console.log(`📧 Using template: ${template.template_name} (${templateData.source})`);
       return renderTemplate(template, data, contact);
     }
   } catch (error) {
-    console.log('⚠️ Failed to load Storyblok template, using fallback');
+    console.log('⚠️ Failed to load template, using fallback:', error);
   }
 
-  // Fallback to hardcoded template
+  // Simple fallback template
+  console.log('📧 Using fallback template');
   const severityText = data.severity >= 8 ? 'CRITICAL' : data.severity >= 5 ? 'MODERATE' : 'LOW';
   const urgencyEmoji = data.severity >= 8 ? '🚨' : data.severity >= 5 ? '⚠️' : 'ℹ️';
   
@@ -134,37 +146,29 @@ async function createEmergencyMessage(data: NotificationData, contact: any) {
           <p style="margin: 10px 0 0 0; font-size: 18px;">Severity: ${severityText} (${data.severity}/10)</p>
         </div>
         
-        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h2 style="color: #1f2937; margin-top: 0;">Emergency Details</h2>
-          <p><strong>Type:</strong> ${data.emergencyType.replace('_', ' ').toUpperCase()}</p>
-          <p><strong>Time:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
-          <p><strong>Location:</strong> ${data.location}</p>
-          <p><strong>AI Assessment:</strong> ${data.aiSummary}</p>
-        </div>
-        
-        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 20px;">
-          <p style="margin: 0;"><strong>Hello ${contact.contact_name},</strong></p>
-          <p style="margin: 10px 0 0 0;">Your emergency contact has activated their Life Alert system. ${data.severity >= 8 ? 'This appears to be a critical emergency and emergency services may have been contacted.' : data.severity >= 5 ? 'This appears to be a moderate emergency requiring attention.' : 'This appears to be a low-severity alert but still requires your attention.'}</p>
-        </div>
-        
-        <div style="background: #e5f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-          <h3 style="color: #1e40af; margin-top: 0;">Recommended Actions:</h3>
-          <ul style="color: #1e40af;">
-            ${data.severity >= 8 ? 
-              '<li>Call emergency services (911) if not already contacted</li><li>Go to the location immediately if safe to do so</li><li>Contact other family members</li>' :
-              data.severity >= 5 ?
-              '<li>Contact them immediately by phone</li><li>Consider going to their location</li><li>Stay in communication until situation is resolved</li>' :
-              '<li>Contact them by phone to check on their wellbeing</li><li>Follow up within the next hour</li>'
-            }
+        <div style="padding: 20px;">
+          <p><strong>Hello ${contact.contact_name},</strong></p>
+          <p>Your emergency contact has activated their Life guardpro system.</p>
+          
+          <p><strong>Emergency Details:</strong></p>
+          <ul>
+            <li><strong>Type:</strong> ${data.emergencyType.replace('_', ' ').toUpperCase()}</li>
+            <li><strong>Time:</strong> ${new Date(data.timestamp).toLocaleString()}</li>
+            <li><strong>Location:</strong> ${data.location}</li>
+            <li><strong>AI Assessment:</strong> ${data.aiSummary}</li>
           </ul>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px;">
-          <p style="color: #6b7280; font-size: 14px;">
-            This alert was generated by Life Alert Emergency Response System<br>
-            ${data.storyblokLogId ? `Log ID: ${data.storyblokLogId}` : ''}<br>
-            Time sent: ${new Date().toLocaleString()}
-          </p>
+          
+          <div style="background: #fef3c7; padding: 15px; margin: 20px 0;">
+            <p><strong>Recommended Actions:</strong></p>
+            <ul>
+              ${data.severity >= 8 ? 
+                '<li>Call 911 immediately if not already done</li><li>Go to their location if safe to do so</li><li>Contact other family members</li>' :
+                data.severity >= 5 ?
+                '<li>Contact them immediately by phone</li><li>Consider going to their location</li><li>Stay in communication until resolved</li>' :
+                '<li>Call them to check on their wellbeing</li><li>Follow up within the next hour</li>'
+              }
+            </ul>
+          </div>
         </div>
       </div>
     `,
@@ -174,7 +178,7 @@ Severity: ${severityText} (${data.severity}/10)
 
 Hello ${contact.contact_name},
 
-Your emergency contact has activated their Life Alert system.
+Your emergency contact has activated their Life guardpro system.
 
 Details:
 - Type: ${data.emergencyType.replace('_', ' ')}
@@ -183,18 +187,100 @@ Details:
 - AI Assessment: ${data.aiSummary}
 
 ${data.severity >= 8 ? 
-  'This appears to be a critical emergency. Emergency services may have been contacted. Please call 911 if not already done and go to the location if safe.' :
+  'This appears to be a critical emergency. Please call 911 if not already done and go to the location if safe.' :
   data.severity >= 5 ?
   'This appears to be a moderate emergency requiring attention. Please contact them immediately.' :
   'This appears to be a low-severity alert but still requires your attention. Please contact them to check on their wellbeing.'
 }
 
-This alert was generated by Life Alert Emergency Response System.
+This alert was generated by Life guardpro Emergency Response System.
     `
   };
 }
 
-// Get message template from Storyblok based on severity
+// Get dynamic template from Storyblok based on emergency type and severity
+async function getDynamicTemplate(templateType: string, severity: number) {
+  try {
+    console.log(`📧 Fetching template for type: ${templateType}, severity: ${severity}`);
+    
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(
+      `${baseUrl}/api/storyblok/templates?type=${templateType}&severity=${severity}&active=true`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('❌ Template API error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const template = data.templates?.[0] || null;
+    
+    if (template) {
+      console.log(`📧 Found template: ${template.template_name} (${template.template_type})`);
+    } else {
+      console.log('📧 No template found, will use fallback');
+    }
+    
+    return template;
+  } catch (error) {
+    console.error('❌ Error fetching dynamic template:', error);
+    return null;
+  }
+}
+
+// Render dynamic template with variables
+function renderDynamicTemplate(template: any, data: NotificationData, contact: any) {
+  try {
+    console.log(`📧 Rendering template: ${template.template_name}`);
+    
+    // Prepare template variables
+    const variables = {
+      contact_name: contact.contact_name || 'Emergency Contact',
+      severity: data.severity,
+      emergency_type: data.emergencyType.replace('_', ' ').toUpperCase(),
+      timestamp: new Date(data.timestamp).toLocaleString(),
+      location: data.location,
+      ai_summary: data.aiSummary,
+      storyblok_log_id: data.storyblokLogId || 'N/A'
+    };
+
+    // Simple template variable replacement
+    function replaceVariables(text: string) {
+      let result = text;
+      Object.entries(variables).forEach(([key, value]) => {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        result = result.replace(regex, String(value));
+      });
+      return result;
+    }
+
+    const renderedSubject = replaceVariables(template.subject_template || 'Emergency Alert');
+    const renderedHtml = replaceVariables(template.html_template || '');
+    const renderedText = replaceVariables(template.text_template || '');
+
+    console.log(`📧 Template rendered successfully: ${renderedSubject}`);
+
+    return {
+      subject: renderedSubject,
+      html: renderedHtml,
+      text: renderedText,
+      template_used: template.template_name,
+      template_type: template.template_type
+    };
+  } catch (error) {
+    console.error('❌ Error rendering dynamic template:', error);
+    throw error;
+  }
+}
+
+// Legacy function for backward compatibility
 async function getMessageTemplate(severity: number) {
   try {
     const storyblokToken = process.env.NEXT_PUBLIC_STORYBLOK_ACCESS_TOKEN;
@@ -238,68 +324,34 @@ async function getMessageTemplate(severity: number) {
 
 // Render template with data
 function renderTemplate(template: any, data: NotificationData, contact: any) {
-  const templateData = {
-    contact_name: contact.contact_name,
-    emergency_type: data.emergencyType.replace('_', ' ').toUpperCase(),
+  const variables = {
+    contact_name: contact.contact_name || 'Emergency Contact',
     severity: data.severity,
+    emergency_type: data.emergencyType.replace('_', ' ').toUpperCase(),
     timestamp: new Date(data.timestamp).toLocaleString(),
     location: data.location,
     ai_summary: data.aiSummary,
     storyblok_log_id: data.storyblokLogId || 'N/A'
   };
 
-  // Simple template replacement
-  const replaceVariables = (text: string) => {
-    return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return templateData[key as keyof typeof templateData] || match;
+  // Simple template variable replacement
+  function replaceVariables(text: string) {
+    let result = text;
+    Object.entries(variables).forEach(([key, value]) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      result = result.replace(regex, String(value));
     });
-  };
+    return result;
+  }
 
   return {
-    subject: replaceVariables(template.subject_template || 'Emergency Alert'),
-    html: replaceVariables(template.html_template || 'Emergency notification'),
-    text: replaceVariables(template.text_template || 'Emergency notification'),
-    sms: replaceVariables(template.sms_template || 'Emergency alert')
+    subject: replaceVariables(template.subject_line || 'Emergency Alert'),
+    html: replaceVariables(template.email_body || ''),
+    text: replaceVariables(template.text_template || '')
   };
 }
 
-// Send email notification (mock implementation - integrate with your email service)
-async function sendEmailNotification(email: string, message: any) {
-  try {
-    console.log(`📧 Sending email to ${email}...`);
-    
-    // Mock email sending - replace with actual email service (SendGrid, AWS SES, etc.)
-    // For demo purposes, we'll simulate success
-    
-    // Example with a hypothetical email service:
-    /*
-    const emailResponse = await fetch('https://api.emailservice.com/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.EMAIL_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        to: email,
-        subject: message.subject,
-        html: message.html,
-        text: message.text
-      })
-    });
-    */
-    
-    // Mock successful response
-    console.log(`✅ Email sent successfully to ${email}`);
-    return { success: true };
-    
-  } catch (error) {
-    console.error(`❌ Email failed for ${email}:`, error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Email sending failed' 
-    };
-  }
-}
+// Email notification function is now imported from emailService.ts
 
 // Send push notification (mock implementation)
 async function sendPushNotification(contact: any, message: any) {
