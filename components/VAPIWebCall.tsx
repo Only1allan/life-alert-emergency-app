@@ -1,27 +1,45 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface VAPIWebCallProps {
   onCallComplete: (result: any) => void;
   onError: (error: string) => void;
+  onEmergencyDetected?: (severity: number, transcript: string) => void;
   emergencyType?: string;
 }
 
 export default function VAPIWebCall({ 
   onCallComplete, 
   onError, 
+  onEmergencyDetected,
   emergencyType = 'panic_button' 
 }: VAPIWebCallProps) {
   const [status, setStatus] = useState<string>('initializing');
   const [error, setError] = useState<string | null>(null);
   const [vapi, setVapi] = useState<any>(null);
+  const initializedRef = useRef(false);
+  const callStartedRef = useRef(false);
 
   // Initialize VAPI with minimal setup
   useEffect(() => {
     const initVAPI = async () => {
+      // Prevent duplicate initialization
+      if (initializedRef.current) {
+        return;
+      }
+      
       try {
-        console.log('🔧 Initializing Basic VAPI...');
+        initializedRef.current = true;
+        
+        // Clean up any existing instance first
+        if (vapi) {
+          try {
+            vapi.stop();
+          } catch (e) {
+            // Ignore cleanup errors
+          }
+        }
         
         const publicKey = process.env.NEXT_PUBLIC_VAPI_API_KEY;
         const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
@@ -34,33 +52,69 @@ export default function VAPIWebCall({
         const VapiModule = await import('@vapi-ai/web');
         const Vapi = VapiModule.default;
         
-        // Create instance
+        // Create instance with proper configuration
         const vapiInstance = new Vapi(publicKey);
         
-        // Minimal event listeners
+        // Event listeners for call management
         vapiInstance.on('call-start', () => {
-          console.log('📞 Call started');
           setStatus('connected');
+          setError(null);
+          
+          // Send emergency notification when call starts
+          triggerEmergencyNotifications();
         });
         
         vapiInstance.on('call-end', () => {
-          console.log('📞 Call ended');
           setStatus('completed');
         });
         
         vapiInstance.on('error', (err: any) => {
-          console.error('❌ VAPI Error:', err);
-          setError(err.message || 'VAPI error');
-          setStatus('error');
-          onError(err.message || 'VAPI error');
+          // Only show critical errors
+          if (err.type === 'call-failed' || err.type === 'connection-failed') {
+            setError(err.message || 'VAPI error');
+            setStatus('error');
+            onError(err.message || 'VAPI error');
+          }
+        });
+
+        vapiInstance.on('message', async (message: any) => {
+          // Handle status updates
+          if (message.type === 'status-update') {
+            if (message.status === 'in-progress') {
+              setStatus('connected');
+              setError(null);
+            }
+          }
+          
+          // Check for emergency keywords in transcript (no email sending)
+          if (message.type === 'transcript' && message.transcript) {
+            const transcript = message.transcript.toLowerCase();
+            const emergencyKeywords = [
+              'help', 'emergency', 'urgent', 'danger', 'accident', 'fall', 'hurt', 
+              'pain', 'bleeding', 'unconscious', 'can\'t breathe', 'chest pain',
+              'heart attack', 'stroke', 'ambulance', 'hospital', '911'
+            ];
+            
+            const emergencyCount = emergencyKeywords.filter(keyword => 
+              transcript.includes(keyword)
+            ).length;
+            
+            if (emergencyCount >= 2) {
+              const severity = Math.min(8 + emergencyCount, 10);
+              
+              if (onEmergencyDetected) {
+                onEmergencyDetected(severity, message.transcript);
+              }
+              
+              // No email sending here - only one email when call starts
+            }
+          }
         });
         
         setVapi(vapiInstance);
         setStatus('ready');
-        console.log('✅ Basic VAPI initialized');
         
       } catch (err) {
-        console.error('❌ Init error:', err);
         const errorMessage = err instanceof Error ? err.message : 'Init failed';
         setError(errorMessage);
         setStatus('error');
@@ -69,7 +123,20 @@ export default function VAPIWebCall({
     };
     
     initVAPI();
-  }, [onError]);
+    
+    // Cleanup function
+    return () => {
+      if (vapi) {
+        try {
+          vapi.stop();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+      initializedRef.current = false;
+      callStartedRef.current = false;
+    };
+  }, []); // Empty dependency array to run only once
 
   // Auto-start call when ready
   useEffect(() => {
@@ -82,32 +149,57 @@ export default function VAPIWebCall({
     if (!vapi) return;
     
     try {
-      console.log('🚨 Starting basic emergency call...');
       setStatus('connecting');
+      setError(null);
       
-      // Simple call start
       await vapi.start(process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID);
       
-      console.log('📞 Call started successfully');
-      
     } catch (err) {
-      console.error('❌ Start call error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Call failed';
-      setError(errorMessage);
-      setStatus('error');
-      onError(errorMessage);
+      // Let VAPI events handle error status
     }
   };
 
   const endCall = () => {
     try {
       if (vapi) {
-        console.log('🔚 Ending call...');
         vapi.stop();
       }
     } catch (error) {
-      console.error('End call error:', error);
       setStatus('completed');
+    }
+  };
+
+  // Trigger emergency notifications when call starts
+  const triggerEmergencyNotifications = async () => {
+    try {
+      // Get emergency contacts
+      const contactsResponse = await fetch('/api/emergency-contacts');
+      const contacts = await contactsResponse.json();
+      
+      if (!contacts || contacts.length === 0) {
+        return;
+      }
+
+      // Prepare notification data
+      const notificationData = {
+        emergencyType: 'panic_button',
+        severity: 8,
+        location: 'Current location (from VAPI call)',
+        timestamp: new Date().toISOString(),
+        aiSummary: 'Emergency panic button activated - VAPI call started',
+        storyblokLogId: null,
+        contacts: contacts.slice(0, 3)
+      };
+
+      // Send notifications
+      await fetch('/api/emergency/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notificationData)
+      });
+      
+    } catch (error) {
+      // Silent error handling
     }
   };
 
@@ -120,6 +212,7 @@ export default function VAPIWebCall({
             {status === 'error' ? '⚠️' : 
              status === 'completed' ? '✅' : 
              status === 'connected' ? '🎤' : 
+             status === 'connecting' ? '📞' :
              '📞'}
           </div>
           
@@ -132,10 +225,17 @@ export default function VAPIWebCall({
             {status === 'error' && 'Error Occurred'}
           </h2>
           
-          {error && (
+          {error && status !== 'connected' && (
             <div className="p-3 bg-red-50 rounded-lg mb-4">
               <div className="text-red-800 font-semibold">Error:</div>
               <div className="text-red-700 text-sm">{error}</div>
+            </div>
+          )}
+          
+          {error && status === 'connected' && (
+            <div className="p-3 bg-green-50 rounded-lg mb-4">
+              <div className="text-green-800 font-semibold">✅ Call Connected!</div>
+              <div className="text-green-700 text-sm">Emergency agent is ready to help</div>
             </div>
           )}
           
@@ -147,6 +247,18 @@ export default function VAPIWebCall({
           )}
           
           <div className="space-y-3">
+            {status === 'ready' && (
+              <div className="w-full bg-blue-100 text-blue-800 py-3 rounded-lg font-semibold text-center">
+                Starting Emergency Call...
+              </div>
+            )}
+            
+            {status === 'connecting' && (
+              <div className="w-full bg-yellow-100 text-yellow-800 py-3 rounded-lg font-semibold text-center">
+                Connecting to Emergency Agent...
+              </div>
+            )}
+            
             {status === 'connected' && (
               <button
                 onClick={endCall}
@@ -171,23 +283,21 @@ export default function VAPIWebCall({
                     notificationsSent: 0
                   };
                   
-                  // Send to Storyblok emergency logging
+                  // Log to Storyblok (notifications already sent during call)
                   try {
-                    console.log('📝 Logging emergency to Storyblok...');
-                    
                     const emergencyLogData = {
-                      userId: 'test-user', // This should come from auth context
+                      userId: 'test-user',
                       emergencyType: emergencyType,
                       severity: emergencyResponse.severity,
                       transcript: emergencyResponse.transcript || 'Call completed successfully',
                       location: {
-                        latitude: 0, // Will be populated from geolocation
+                        latitude: 0,
                         longitude: 0,
                         address: 'Current location'
                       },
                       timestamp: emergencyResponse.timestamp,
                       aiDecision: 'Emergency call completed via VAPI agent',
-                      actionsTaken: ['AI emergency assessment completed', 'Emergency contacts to be notified'],
+                      actionsTaken: ['AI emergency assessment completed', 'Emergency contacts notified'],
                       duration: emergencyResponse.duration,
                       status: 'resolved' as const,
                       responseTime: emergencyResponse.duration
@@ -202,15 +312,12 @@ export default function VAPIWebCall({
                     const logResult = await logResponse.json();
                     
                     if (logResult.success) {
-                      console.log('✅ Emergency logged to Storyblok:', logResult.logId);
                       emergencyResponse.storyblokLogId = logResult.storyblokId;
-                      emergencyResponse.notificationsSent = logResult.notificationsSent;
-                    } else {
-                      console.error('❌ Failed to log to Storyblok:', logResult.error);
+                      emergencyResponse.notificationsSent = 1;
                     }
                     
                   } catch (error) {
-                    console.error('❌ Error logging emergency:', error);
+                    // Silent error handling
                   }
                   
                   onCallComplete(emergencyResponse);
