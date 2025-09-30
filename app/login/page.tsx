@@ -5,7 +5,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-8">
-          Login to Life GuardPro
+          Login to LifeGuard Pro
         </h1>
         
         <form className="space-y-6">

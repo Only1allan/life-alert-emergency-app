@@ -48,7 +48,7 @@ export async function sendEmailNotification(email: string, message: EmailMessage
     }
 
     const mailOptions = {
-      from: `"Life GuardPro Emergency System" <${process.env.EMAIL_USER}>`,
+      from: `"LifeGuard Pro Emergency System" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: message.subject,
       html: message.html,

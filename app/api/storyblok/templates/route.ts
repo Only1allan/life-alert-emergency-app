@@ -84,7 +84,7 @@ function getFallbackTemplate(type: string, severity: number) {
         </div>
         <div style="padding: 20px;">
           <p><strong>Hello {{contact_name}},</strong></p>
-          <p>Your emergency contact has activated their Life GuardPro system.</p>
+          <p>Your emergency contact has activated their LifeGuard Pro system.</p>
           <p><strong>Emergency Details:</strong></p>
           <ul>
             <li><strong>Type:</strong> {{emergency_type}}</li>

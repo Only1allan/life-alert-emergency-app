@@ -1,4 +1,4 @@
-// Type definitions for the Life GuardPro App
+// Type definitions for the LifeGuard Pro App
 
 // User related types
 export interface User {

@@ -1,4 +1,4 @@
-# 🚨 Life GuardPro - AI-Powered Emergency Response System
+# 🚨 LifeGuard Pro - AI-Powered Emergency Response System
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black)](https://nextjs.org/)
 [![Storyblok](https://img.shields.io/badge/Storyblok-CMS-blue)](https://www.storyblok.com/)
@@ -8,7 +8,7 @@
 
 > **Revolutionary emergency response system powered by Storyblok CMS and AI voice technology**
 
-Life GuardPro is a cutting-edge emergency response application that combines the power of headless CMS with AI-driven voice assistance to provide instant help when you need it most. Built for the Storyblok Hackathon, this system demonstrates how content management can power mission-critical applications.
+LifeGuard Pro is a cutting-edge emergency response application that combines the power of headless CMS with AI-driven voice assistance to provide instant help when you need it most. Built for the Storyblok Hackathon, this system demonstrates how content management can power mission-critical applications.
 
 ## 🌟 Key Features
 

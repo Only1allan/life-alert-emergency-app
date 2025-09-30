@@ -186,7 +186,7 @@ export function useAppConfig() {
         response_timeout: 30,
         auto_call_enabled: true,
         location_sharing_enabled: true,
-        emergency_message: 'This is an emergency alert from Life GuardPro. Immediate assistance is needed.',
+        emergency_message: 'This is an emergency alert from LifeGuard Pro. Immediate assistance is needed.',
         features: {
           fall_detection: true,
           voice_activation: true,

@@ -49,7 +49,7 @@ export default function Navbar({ user }: NavbarProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="text-2xl">🚨</div>
-            <span className="text-xl font-bold text-gray-800">Life GuardPro</span>
+            <span className="text-xl font-bold text-gray-800">LifeGuard Pro</span>
           </Link>
 
           {/* Desktop Navigation */}

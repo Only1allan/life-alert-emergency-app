@@ -1,11 +1,11 @@
-# 🏗️ Storyblok Setup Guide - Life GuardPro Emergency System
+# 🏗️ Storyblok Setup Guide - LifeGuard Pro Emergency System
 
 ## 🎯 **How to See Your Emergency Data in Storyblok**
 
 ### **Step 1: Access Your Storyblok Space**
 1. Go to [app.storyblok.com](https://app.storyblok.com)
 2. Log in to your account
-3. Select your Life GuardPro project space
+3. Select your LifeGuard Pro project space
 
 ### **Step 2: Create Content Types (Blocks)**
 

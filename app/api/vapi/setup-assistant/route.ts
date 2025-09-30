@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     // VAPI Assistant Configuration
     const assistantConfig = {
-      name: "Life GuardPro Emergency Assistant",
+      name: "LifeGuard Pro Emergency Assistant",
       model: {
         provider: "openai",
         model: "gpt-4",
@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
         provider: "elevenlabs",
         voiceId: "21m00Tcm4TlvDq8ikWAM"
       },
-      firstMessage: "Hello, this is your Life GuardPro Emergency Assistant. I'm here to help assess your emergency situation. Please tell me what's happening and describe your emergency in detail. I'll ask you some questions to determine the severity level and coordinate the appropriate response.",
-      systemMessage: `You are a professional emergency response AI assistant for Life GuardPro. Your role is to:
+      firstMessage: "Hello, this is your LifeGuard Pro Emergency Assistant. I'm here to help assess your emergency situation. Please tell me what's happening and describe your emergency in detail. I'll ask you some questions to determine the severity level and coordinate the appropriate response.",
+      systemMessage: `You are a professional emergency response AI assistant for LifeGuard Pro. Your role is to:
 
 1. Assess emergency situations quickly and accurately
 2. Determine severity levels (1-10 scale)
@@ -78,7 +78,7 @@ Be thorough but efficient - time is critical in emergencies.`,
           required: ["severity", "emergency_type", "transcript"]
         }
       }],
-      endCallMessage: "Thank you for using Life GuardPro Emergency Assistant. Help is being coordinated based on your situation. Stay safe and follow any instructions provided by emergency responders.",
+      endCallMessage: "Thank you for using LifeGuard Pro Emergency Assistant. Help is being coordinated based on your situation. Stay safe and follow any instructions provided by emergency responders.",
       endCallPhrases: ["end call", "goodbye", "thank you", "that's all", "help is coming"],
       recordingEnabled: true,
       silenceTimeoutSeconds: 30,

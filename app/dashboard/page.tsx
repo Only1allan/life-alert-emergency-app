@@ -149,7 +149,7 @@ export default function DashboardPage() {
               <div className="flex items-center space-x-4">
                 <div className="text-3xl">🚨</div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Life GuardPro Dashboard</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">LifeGuard Pro Dashboard</h1>
                   <p className="text-sm text-gray-600">Emergency Response System • {currentTime}</p>
                 </div>
               </div>
