@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useUserProfile, useEmergencyData } from '../../hooks/useStoryblok';
 import PanicButton from '../../components/PanicButton';
@@ -147,7 +148,15 @@ export default function DashboardPage() {
           <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="text-3xl">🚨</div>
+                <div className="flex-shrink-0">
+                  <Image
+                    src="/images/LifeGuardPro_Logo.png"
+                    alt="LifeGuard Pro Logo"
+                    width={88}
+                    height={88}
+                    className="object-contain"
+                  />
+                </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">LifeGuard Pro Dashboard</h1>
                   <p className="text-sm text-gray-600">Emergency Response System • {currentTime}</p>

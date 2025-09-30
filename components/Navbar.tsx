@@ -51,7 +51,7 @@ export default function Navbar({ user }: NavbarProps) {
           {/* Logo */}
           <div className="flex items-center space-x-4">
             <img
-              src="/images/LifeGuardPro_Logo.png"
+              src="/images/LifeGuardPro_Logo_Transparent.png"
               alt="LifeGuard Pro Logo"
               width={120}
               height={120}
