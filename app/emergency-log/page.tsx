@@ -4,7 +4,7 @@ export default function EmergencyLogPage() {
   const emergencyLog = [
     {
       id: 1,
-      date: "2024-01-15",
+      date: "2025-01-15",
       time: "14:30",
       type: "Medical Emergency",
       location: "123 Main St, Anytown, ST",
@@ -14,7 +14,7 @@ export default function EmergencyLogPage() {
     },
     {
       id: 2,
-      date: "2024-01-10",
+      date: "2025-01-10",
       time: "09:15",
       type: "Fall Detection",
       location: "Home - Kitchen",
@@ -24,7 +24,7 @@ export default function EmergencyLogPage() {
     },
     {
       id: 3,
-      date: "2024-01-05",
+      date: "2025-01-05",
       time: "22:45",
       type: "Panic Button",
       location: "123 Main St, Anytown, ST",

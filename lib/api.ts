@@ -405,7 +405,7 @@ export const medicalApi = {
         conditions: ['Hypertension', 'Diabetes Type 2'],
         medications: ['Lisinopril 10mg', 'Metformin 500mg'],
         emergencyNotes: 'Patient has history of cardiac episodes',
-        lastUpdated: '2024-01-15T10:30:00Z'
+        lastUpdated: '2025-01-15T10:30:00Z'
       };
     } catch (error) {
       console.error('Error getting medical summary:', error);

@@ -269,7 +269,7 @@ export function useEmergency(): UseEmergencyReturn {
         {
           id: '1',
           type: 'panic_button',
-          date: '2024-01-15',
+          date: '2025-01-15',
           time: '14:30',
           status: 'resolved',
           responseTime: 180,
@@ -278,7 +278,7 @@ export function useEmergency(): UseEmergencyReturn {
         {
           id: '2',
           type: 'fall_detection',
-          date: '2024-01-10',
+          date: '2025-01-10',
           time: '09:15',
           status: 'resolved',
           responseTime: 120,
