@@ -1,4 +1,4 @@
-# Life Alert Panic Button MVP - Technical Requirements Document
+# Life guardpro Panic Button MVP - Technical Requirements Document
 
 ## Executive Summary
 A comprehensive emergency response system leveraging Storyblok CMS for content management, VAPI for AI voice assistance, and Next.js for the frontend. The system enables users to trigger emergency assistance through a panic button that initiates an intelligent workflow to connect them with the most appropriate help.
@@ -6,7 +6,7 @@ A comprehensive emergency response system leveraging Storyblok CMS for content m
 ## Project Overview
 
 ### Core Concept
-- **Problem**: Traditional life alert systems are expensive and limited in functionality
+- **Problem**: Traditional Life guardpro systems are expensive and limited in functionality
 - **Solution**: Web-based panic button with AI-driven emergency assessment and response
 - **Target**: Elderly users, people with medical conditions, individuals living alone
 - **Hackathon Goal**: Demonstrate Storyblok's versatility in mission-critical applications
@@ -330,4 +330,4 @@ vapiApi.handleAssessmentResponse(severity, type, context)
 
 ## Conclusion
 
-This Life Alert MVP demonstrates Storyblok's versatility beyond traditional marketing sites, showcasing its capability to power mission-critical applications with real-time data management, complex content relationships, and seamless API integration. The combination of AI-driven assessment, content-managed emergency routing, and scalable architecture creates a compelling solution that could genuinely save lives while highlighting Storyblok's potential in unexpected domains.
+This Life guardpro MVP demonstrates Storyblok's versatility beyond traditional marketing sites, showcasing its capability to power mission-critical applications with real-time data management, complex content relationships, and seamless API integration. The combination of AI-driven assessment, content-managed emergency routing, and scalable architecture creates a compelling solution that could genuinely save lives while highlighting Storyblok's potential in unexpected domains.

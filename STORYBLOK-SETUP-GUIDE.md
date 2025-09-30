@@ -1,11 +1,11 @@
-# 🏗️ Storyblok Setup Guide - Life Alert Emergency System
+# 🏗️ Storyblok Setup Guide - Life guardpro Emergency System
 
 ## 🎯 **How to See Your Emergency Data in Storyblok**
 
 ### **Step 1: Access Your Storyblok Space**
 1. Go to [app.storyblok.com](https://app.storyblok.com)
 2. Log in to your account
-3. Select your Life Alert project space
+3. Select your Life guardpro project space
 
 ### **Step 2: Create Content Types (Blocks)**
 
@@ -270,5 +270,8 @@ curl "https://api.storyblok.com/v2/cdn/stories?token=YOUR_TOKEN&filter_query[com
 - Real-time dashboard updates
 - Professional notification system
 
-**Your Life Alert system now showcases Storyblok's full potential for mission-critical applications!** 🚀
+**Your Life guardpro system now showcases Storyblok's full potential for mission-critical applications!** 🚀
+
+
+
 

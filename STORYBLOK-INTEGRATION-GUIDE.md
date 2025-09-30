@@ -1,4 +1,4 @@
-# 🚨 Life Alert - Storyblok Integration Guide
+# 🚨 Life guardpro - Storyblok Integration Guide
 
 ## 🎯 **Emergency Data Flow: VAPI → Storyblok → Notifications**
 
@@ -202,7 +202,7 @@ This guide explains how emergency conversation data flows from VAPI to Storyblok
 
 Hello John Doe,
 
-Your emergency contact has activated their Life Alert system. 
+Your emergency contact has activated their Life guardpro system. 
 This appears to be a critical emergency and emergency services 
 may have been contacted.
 
