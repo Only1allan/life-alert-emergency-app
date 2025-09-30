@@ -13,7 +13,7 @@ export default function Home() {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1931&q=80"
+            src="/images/hero.png"
             alt="Emergency Response Technology"
             fill
             className="object-cover"
@@ -207,42 +207,42 @@ export default function Home() {
                   title: 'One-Touch Emergency',
                   description: 'Press the panic button to instantly alert emergency services and your contacts with your exact location.',
                   color: 'red',
-                  image: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2059&q=80'
+                  image: '/images/one-touch.jpg'
                 },
                 {
                   icon: '🤖',
                   title: 'AI-Powered Assessment',
                   description: 'Our intelligent AI agent assesses your situation and coordinates the most appropriate response.',
                   color: 'blue',
-                  image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2025&q=80'
+                  image: '/images/ai-helper.jpg'
                 },
                 {
                   icon: '📍',
                   title: 'GPS Location Sharing',
                   description: 'Your precise location is automatically shared with responders for faster emergency response times.',
                   color: 'green',
-                  image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
+                  image: '/images/gps.jpg'
                 },
                 {
                   icon: '👥',
                   title: 'Emergency Contacts',
                   description: 'Instantly notify your family, friends, and medical professionals when you need help most.',
                   color: 'purple',
-                  image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'
+                  image: '/images/emergency.jpg'
                 },
                 {
                   icon: '📱',
                   title: 'Smart Integration',
                   description: 'Seamlessly integrates with your existing devices and emergency services for maximum coverage.',
                   color: 'indigo',
-                  image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80'
+                  image: '/images/smart.jpg'
                 },
                 {
                   icon: '⚡',
                   title: 'Instant Response',
                   description: 'Get help in seconds with our optimized emergency response workflow and real-time monitoring.',
                   color: 'yellow',
-                  image: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2059&q=80'
+                  image: '/images/instantresponse.jpg'
                 }
               ].map((feature, index) => (
                 <div key={index} className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-gray-100">
