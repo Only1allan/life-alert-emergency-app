@@ -89,33 +89,3 @@ async function sendMockEmail(email: string, message: EmailMessage) {
   }
 }
 
-// Test email configuration
-export async function testEmailConfiguration() {
-  try {
-    const transporter = createEmailTransporter();
-    
-    if (!transporter) {
-      return {
-        success: false,
-        message: 'No email credentials configured',
-        mock: true
-      };
-    }
-
-    // Test the connection
-    await transporter.verify();
-    
-    return {
-      success: true,
-      message: 'Email configuration is valid',
-      mock: false
-    };
-    
-  } catch (error) {
-    return {
-      success: false,
-      message: `Email configuration error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      mock: true
-    };
-  }
-}
