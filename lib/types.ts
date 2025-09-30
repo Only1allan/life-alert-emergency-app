@@ -1,4 +1,4 @@
-// Type definitions for the Life Alert App
+// Type definitions for the Life guardpro App
 
 // User related types
 export interface User {
