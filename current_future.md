@@ -1,6 +1,6 @@
-### Project Overview: Life guardpro App
+### Project Overview: Life GuardPro App
 
-This document provides an overview of the "Life guardpro App," its current architecture, and the roadmap for its future development.
+This document provides an overview of the "Life GuardPro App," its current architecture, and the roadmap for its future development.
 
 The core idea is to provide a modern, web-based personal emergency response system. A user can signal for help, and the system will automatically notify their designated contacts with critical information.
 

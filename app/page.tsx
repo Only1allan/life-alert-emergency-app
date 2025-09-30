@@ -29,7 +29,7 @@ export default function Home() {
 
             {/* Main Heading */}
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Life guardpro
+              Life GuardPro
               <span className="block text-blue-200">Emergency Response</span>
             </h1>
             
@@ -199,7 +199,7 @@ export default function Home() {
             {/* Header */}
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Why Choose Life guardpro?
+                Why Choose Life GuardPro?
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Experience the future of emergency response with our comprehensive suite of safety features designed to protect you and your loved ones.
@@ -403,7 +403,7 @@ export default function Home() {
                     <span className="text-2xl">🚨</span>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold">Life guardpro</h3>
+                    <h3 className="text-2xl font-bold">Life GuardPro</h3>
                     <p className="text-gray-400 text-sm">Emergency Response</p>
                   </div>
                 </div>
@@ -466,7 +466,7 @@ export default function Home() {
             <div className="border-t border-gray-800 mt-12 pt-8">
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <p className="text-gray-400 text-sm mb-4 md:mb-0">
-                  © 2024 Life guardpro Emergency Response. All rights reserved.
+                  © 2024 Life GuardPro Emergency Response. All rights reserved.
                 </p>
                 
                 <div className="flex items-center space-x-6 text-sm text-gray-400">

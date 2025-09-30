@@ -9,7 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Life guardpro App",
+  title: "Life GuardPro App",
   description: "Emergency response application for quick help when you need it most",
 };
 

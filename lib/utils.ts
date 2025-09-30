@@ -1,4 +1,4 @@
-// Utility functions for the Life guardpro App
+// Utility functions for the Life GuardPro App
 
 // Utility function to merge classes (simplified version without external deps)
 export function cn(...classes: (string | undefined | null | false)[]): string {
