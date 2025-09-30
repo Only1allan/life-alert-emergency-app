@@ -129,7 +129,7 @@ NEXT_PUBLIC_STORYBLOK_SPACE_ID=your_space_id_here
 STORYBLOK_MANAGEMENT_TOKEN=your_management_token_here
 
 # Base URL for webhooks
-NEXT_PUBLIC_BASE_URL=http://localhost:3004
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
 **How to get these tokens:**
@@ -140,7 +140,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3004
 ### **Step 5: Test the Integration**
 
 #### **A. Test Emergency Logging**
-1. Go to `http://localhost:3004/dashboard`
+1. Go to `http://localhost:3000/dashboard`
 2. Press the **PANIC BUTTON**
 3. Complete VAPI conversation
 4. Click **"Complete & Log Emergency"**
@@ -269,8 +269,6 @@ curl "https://api.storyblok.com/v2/cdn/stories?token=YOUR_TOKEN&filter_query[com
 - AI-generated content in Storyblok
 - Real-time dashboard updates
 - Professional notification system
-
-**Your Life guardpro system now showcases Storyblok's full potential for mission-critical applications!** 🚀
 
 
 
