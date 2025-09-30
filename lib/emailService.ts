@@ -63,14 +63,14 @@ export async function sendEmailNotification(email: string, message: EmailMessage
       response: result.response 
     };
     
-  } catch (error) {
+  } catch {
     // Fallback to mock email if real email fails
     return await sendMockEmail(email, message);
   }
 }
 
 // Mock email service for testing/fallback
-async function sendMockEmail(email: string, message: EmailMessage) {
+async function sendMockEmail(_email: string, _message: EmailMessage) {
   try {
     // Simulate email sending delay
     await new Promise(resolve => setTimeout(resolve, 1000));

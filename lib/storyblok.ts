@@ -1,5 +1,5 @@
 // Storyblok API configuration and utilities
-import { ISbStoriesParams, ISbStoryData } from '@storyblok/react';
+import { ISbStoriesParams } from '@storyblok/react';
 
 // Storyblok configuration
 export const storyblokConfig = {
@@ -205,7 +205,7 @@ export class StoryblokAPI {
   }
 
   // Get emergency logs
-  async getEmergencyLogs(userId?: string): Promise<any[]> {
+  async getEmergencyLogs(_userId?: string): Promise<any[]> {
     try {
       console.log('Fetching emergency logs...');
       // Get all stories and filter by content type
